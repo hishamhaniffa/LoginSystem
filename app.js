@@ -12,6 +12,7 @@ var passport = require('passport');
 var mongoose = require('mongoose');
 
 var configDB = require('./config/db');
+require('./config/passport')(passport);
 mongoose.connect(configDB.url);
 
 var routes = require('./routes/index');
@@ -61,6 +62,9 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use('/', routes);
 
