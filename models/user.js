@@ -43,3 +43,7 @@ module.exports.comparePassword = function(password, hash, callback) {
 module.exports.addUser = function(user, callback){
 	User.create(user, callback);
 }
+
+module.exports.getUserByUsername = function(username, callback){
+	User.findOne({username: username}, callback);
+}

@@ -5,7 +5,7 @@ var bcrypt = require('bcryptjs');
 
 module.exports = function(passport) {
 	passport.serializeUser(function(user, done) {
-		done(null, user.id);
+		done(null, user._id);
 	});
 
 	passport.deserializeUser(function(id, done) {
@@ -25,12 +25,12 @@ module.exports = function(passport) {
 			}, function(err, user) {
 				if (err) {
 					console.log("Error" + err);
-					return done(err);
+					return done(null, false, {message: err});
 				}
 
 				if (user) {
 					console.log('User already exists');
-					return done(null, false, req.flash('message', 'user already exists'));
+					return done(null, false, {message: 'user already exists'});
 				} else {
 					var newUser = new User();
 					newUser.username = username;
@@ -55,7 +55,34 @@ module.exports = function(passport) {
 		process.nextTick(findOrCreateUser);
 	}));
 
+	passport.use('local-login', new LocalStrategy({
+		passReqToCallback: true
+	}, function(req, username, password, done){
+		User.getUserByUsername(username, function(err, user){
+			if(err){
+				console.log('Error' + err);
+				return done(err);
+			}
+			
+			if(!user){
+				console.log('Error : user not found')
+				return done(null, false, req.flash('error', 'User not found'));
+			}
+
+			if(!isValidPassword(user, password)){
+				return done(null, false, req.flash('error', 'Invalid password'));
+			}
+
+			
+			return done(null, user, req.flash('success', 'You are now logged in'));
+		});
+	}));
+
 	var createHash = function(password) {
 		return bcrypt.hashSync(password, bcrypt.genSaltSync(10), null);
+	}
+
+	var isValidPassword = function(user, password){
+		return bcrypt.compareSync(password, user.password);
 	}
 }

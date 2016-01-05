@@ -6,10 +6,10 @@ var expressValidator = require('express-validator');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var exphbs = require('express-handlebars');
-var flash = require('connect-flash');
 var session  = require('express-session');
 var passport = require('passport');
 var mongoose = require('mongoose');
+var flash = require('connect-flash');
 
 var configDB = require('./config/db');
 require('./config/passport')(passport);
@@ -22,15 +22,10 @@ var app = express();
 app.use(session({
   secret: 'secret',
   saveUninitialized: true,
-  resave: true
+  resave: 'true'
 }));
 
-//makes a global variable to access the flash messages within the view template
-app.use(require('connect-flash')());
-app.use(function (req, res, next) {
-  res.locals.messages = require('express-messages')(req, res);
-  next();
-});
+app.use(flash());
 
 // In this example, the formParam value is going to get morphed into form body format useful for printing.
 app.use(expressValidator({
@@ -65,6 +60,14 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(passport.initialize());
 app.use(passport.session());
+
+//makes a global variable to access the flash messages within the view template
+
+app.use(function (req, res, next) {
+  res.locals.messages = require('express-messages')(req, res);
+  next();
+});
+
 
 app.use('/', routes);
 

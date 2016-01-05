@@ -4,7 +4,7 @@ var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('login', { title: 'Login' });
+  res.render('login', { title: 'Login'});
 });
 
 router.get('/register', function(req, res, next) {
@@ -22,7 +22,7 @@ router.post('/register', function(req, res, next) {
   req.checkBody('email', 'Email field is required').notEmpty();
   req.checkBody('email', 'Email must be valid').isEmail();
   req.checkBody('username', 'Username field is required').notEmpty();
-  req.checkBody('password', 'Name field is required').notEmpty();
+  req.checkBody('password', 'Password field is required').notEmpty();
   req.checkBody('password2', 'Password do not match').equals(password);
 
 
@@ -41,6 +41,28 @@ router.post('/register', function(req, res, next) {
   }
   
 });
+
+router.post('/login', function(req, res, next){
+  var username = req.body.username;
+  var password = req.body.password;
+
+  req.checkBody('username', 'Username field is required').notEmpty();
+  req.checkBody('password', 'Password field is required').notEmpty();
+
+  passport.authenticate('local-login', {
+    successRedirect: '/dashboard',
+    failureRedirect: '/',
+    failureFlash: true,
+  })(req, res, next);
+
+});
+
+router.get('/logout', function(req, res, next){
+  req.logout();
+  req.flash('success', 'Logged out successfully');
+  res.redirect('/');
+});
+
 
 
 router.get('/dashboard', function(req, res, next) {
